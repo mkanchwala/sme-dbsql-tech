@@ -1,5 +1,5 @@
 import os
-from databricks import sql
+import pyodbc
 from configparser import ConfigParser
 
 config = ConfigParser()
@@ -10,10 +10,20 @@ config.read(config_filename)
 server_hostname = config.get('warehouse', 'server_hostname')
 http_path = config.get('warehouse', 'http_path')
 access_token = config.get('databricks_token', 'my_pat')
+driver_path = config.get('odbc', 'driver_path')
 
-conn = sql.connect(server_hostname=server_hostname,
-                  http_path=http_path,
-                  access_token=access_token)
+conn = pyodbc.connect(f"Driver={driver_path};" +
+                      f"HOST={server_hostname};" +
+                      "PORT=443;" +
+                      "Schema=default;" +
+                      "SparkServerType=3;" +
+                      "AuthMech=3;" +
+                      "UID=token;" +
+                      f"PWD={access_token};" +
+                      "ThriftTransport=2;" +
+                      "SSL=1;" +
+                      f"HTTPPath={http_path}",
+                      autocommit=True)
 
 
 def run_query(query_name="simple_aggregation.sql"):
@@ -25,6 +35,7 @@ def run_query(query_name="simple_aggregation.sql"):
   cursor.execute(sql_query)
   for row in cursor.fetchall():
     print(row)
+
 
 if __name__ == '__main__':
   run_query()
