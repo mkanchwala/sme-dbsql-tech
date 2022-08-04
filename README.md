@@ -14,3 +14,5 @@ Before you start using this repo, you should create your own configuration file.
 > pip install databricks-sql-cli
 > pip install databricks-sql-connector
 > pip install pyodbc
+
+https://databricks.atlassian.net/wiki/spaces/UN/pages/2659943487/SQL+Execution+API+-+Private+preview+sql+exec+api+private+preview
