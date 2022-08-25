@@ -5,7 +5,7 @@ from os import listdir
 from os.path import isfile, join
 
 from utils import get_config
-from warehouses import _get_warehouse_id
+from warehouses import _get_warehouse_id, stop_warehouse
 from connectors import run_query_with_dbsql_cli, run_query_with_odbc, run_query_with_python_package
 
 my_config = get_config()
@@ -60,8 +60,10 @@ def _get_query_detail(lookup_key):
 def run_benchmark(nb_runs=3, python_package=True, odbc=True, dbsql_cli= True):
     df = pd.DataFrame(columns=["connector", "query"] + metrics_of_interest)
 
-    queries_list = [f for f in listdir("queries") if isfile(join("queries", f))]
+    queries_list = [f for f in listdir("queries") if isfile(join("queries", f)) and f[0] != '_'""]
     
+    stop_warehouse()
+
     for query in queries_list:
         if python_package:
             for _ in range(nb_runs):
