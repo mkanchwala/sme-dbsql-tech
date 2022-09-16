@@ -2,8 +2,8 @@ SELECT
   payment_type,
   SUM(total_amount) as total_paid
 FROM
-  sme_dbsql_perf.nyctaxi_yr
+  alex.nyctaxi_yellowcab_dates
 WHERE
-  p_year = 2014
+  passenger_count > 1
 GROUP BY
   payment_type

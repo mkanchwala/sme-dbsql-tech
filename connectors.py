@@ -1,9 +1,10 @@
 import os
 import pyodbc
 from databricks import sql
+import requests
 
 from utils import get_config
-from warehouses import get_http_path, create_warehouse, stop_warehouse
+from warehouses import get_http_path, create_warehouse, stop_warehouse, get_warehouse_id
 
 my_config = get_config()
 server_hostname = my_config.get('warehouse', 'server_hostname')
@@ -74,3 +75,38 @@ def run_query_with_python_package(query_name="simple_aggregation.sql"):
   cursor.close()
   conn.close()
   stop_warehouse()
+
+def run_query_with_api(query_name="simple_aggregation.sql"):
+  create_warehouse()
+
+  sql_filename = os.path.join(dirname, 'queries', query_name)
+  fd = open(sql_filename, 'r')
+  sql_query = fd.read()
+  fd.close()
+
+  endpoint = "api/2.0/sql/statements"
+  url = f"https://{server_hostname}/{endpoint}"
+  headers = {
+    "Authorization": f"Bearer {access_token}",
+    "Content-Type": "application/json",
+    "Host": server_hostname
+  }
+  body = {
+    "statement": sql_query,
+    "warehouse_id": str(get_warehouse_id())
+  }
+  r = requests.post(url, headers=headers, json=body)
+  
+  if r.status_code == 200:
+      fetch_token = r.json()["execution_token"]
+      state = r.json()["execution_status"]["state"]
+      while state != "SUCCESS":
+        r= requests.get(f"{url}/{fetch_token}", headers=headers)
+        if r.status_code == 200:
+          state = r.json()["execution_status"]["state"]
+        else:
+          print("Error: %s: %s" % (r.json()["error_code"], r.json()["message"]))
+  else:
+      print("Error: %s: %s" % (r.json()["error_code"], r.json()["message"]))
+  stop_warehouse()
+

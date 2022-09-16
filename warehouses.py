@@ -22,13 +22,13 @@ def _warehouse_exists():
     warehouses = _list_warehouses()
     return warehouse_name in [w["name"] for w in warehouses]
 
-def _get_warehouse_id():
+def get_warehouse_id():
     warehouses = _list_warehouses()
     warehouse_id = [w["id"] for w in warehouses if w["name"] == warehouse_name][0]
     return warehouse_id
 
 def get_http_path():
-    warehouse_id = _get_warehouse_id()
+    warehouse_id = get_warehouse_id()
     response = requests.get(
         f"https://{server_hostname}/api/2.0/sql/warehouses/{warehouse_id}",
         headers={'Authorization': f'Bearer {access_token}'}
@@ -65,7 +65,7 @@ def create_warehouse():
 
 
 def stop_warehouse():
-    warehouse_id = _get_warehouse_id()
+    warehouse_id = get_warehouse_id()
     response = requests.post(
         f"https://{server_hostname}/api/2.0/sql/warehouses/{warehouse_id}/stop",
         headers={'Authorization': f'Bearer {access_token}'},

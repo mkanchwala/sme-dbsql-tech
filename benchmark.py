@@ -5,8 +5,8 @@ from os import listdir
 from os.path import isfile, join
 
 from utils import get_config
-from warehouses import _get_warehouse_id, stop_warehouse
-from connectors import run_query_with_dbsql_cli, run_query_with_odbc, run_query_with_python_package
+from warehouses import get_warehouse_id
+from connectors import run_query_with_dbsql_cli, run_query_with_odbc, run_query_with_python_package, run_query_with_api
 
 my_config = get_config()
 server_hostname = my_config.get('warehouse', 'server_hostname')
@@ -16,7 +16,7 @@ access_token = my_config.get('databricks_token', 'my_pat')
 metrics_of_interest = ["compilation_time_ms", "execution_time_ms", "task_total_time_ms", "result_fetch_time_ms"]
 
 def _get_query_lookup_key():
-    warehouse_id = _get_warehouse_id()
+    warehouse_id = get_warehouse_id()
 
     response = requests.get(
         f"https://{server_hostname}/api/2.0/sql/history/queries/",
@@ -57,12 +57,10 @@ def _get_query_detail(lookup_key):
         print("Error: %s: %s" % (response.json()["error_code"], response.json()["message"]))
 
 
-def run_benchmark(nb_runs=3, python_package=True, odbc=True, dbsql_cli= True):
+def run_benchmark(nb_runs=3, python_package=True, odbc=True, dbsql_cli= True, api=True):
     df = pd.DataFrame(columns=["connector", "query"] + metrics_of_interest)
 
     queries_list = [f for f in listdir("queries") if isfile(join("queries", f)) and f[0] != '_'""]
-    
-    stop_warehouse()
 
     for query in queries_list:
         if python_package:
@@ -91,6 +89,16 @@ def run_benchmark(nb_runs=3, python_package=True, odbc=True, dbsql_cli= True):
                 lookup_key = _get_query_lookup_key()
                 query_info = _get_query_detail(lookup_key)
                 query_info["connector"] = "dbsql_cli"
+                query_info["query"] = query
+                df = df.append(query_info, ignore_index=True)
+                print(df)
+
+        if api:
+            for _ in range(nb_runs):
+                run_query_with_api(query)
+                lookup_key = _get_query_lookup_key()
+                query_info = _get_query_detail(lookup_key)
+                query_info["connector"] = "api"
                 query_info["query"] = query
                 df = df.append(query_info, ignore_index=True)
                 print(df)
