@@ -1,7 +1,7 @@
 SELECT 
   * 
 FROM 
-  sme_dbsql_perf.nyctaxi_yr 
+  sme_dbsql_perf.nyctaxi
 WHERE
-  p_year = 2014
-LIMIT 1000
+  passenger_count
+LIMIT 1000000

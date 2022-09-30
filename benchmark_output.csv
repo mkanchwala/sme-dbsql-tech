@@ -1,0 +1,17 @@
+,connector,query,compilation_time_ms,execution_time_ms,task_total_time_ms,result_fetch_time_ms
+0,python_package,simple_aggregation.sql,741,4653,2623,146
+1,python_package,simple_aggregation.sql,4692,990,594,3245
+2,odbc,simple_aggregation.sql,7180,21886,17679,714
+3,odbc,simple_aggregation.sql,1731,1175,680,322
+4,dbsql_cli,simple_aggregation.sql,6816,18754,15970,2307
+5,dbsql_cli,simple_aggregation.sql,6900,21038,16951,2405
+6,api,simple_aggregation.sql,4527,1039,659,335
+7,api,simple_aggregation.sql,6878,22007,17886,302
+8,python_package,simple_filter.sql,7168,16365,14109,3776
+9,python_package,simple_filter.sql,4100,559,350,3043
+10,odbc,simple_filter.sql,7359,17996,15620,497
+11,odbc,simple_filter.sql,7335,18477,16147,486
+12,dbsql_cli,simple_filter.sql,6151,441,218,2503
+13,dbsql_cli,simple_filter.sql,7141,17724,15443,3088
+14,api,simple_filter.sql,7170,18657,16274,294
+15,api,simple_filter.sql,7279,18895,16568,280

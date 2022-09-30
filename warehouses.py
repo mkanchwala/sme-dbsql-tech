@@ -22,13 +22,13 @@ def _warehouse_exists():
     warehouses = _list_warehouses()
     return warehouse_name in [w["name"] for w in warehouses]
 
-def _get_warehouse_id():
+def get_warehouse_id():
     warehouses = _list_warehouses()
     warehouse_id = [w["id"] for w in warehouses if w["name"] == warehouse_name][0]
     return warehouse_id
 
-def _get_http_path():
-    warehouse_id = _get_warehouse_id()
+def get_http_path():
+    warehouse_id = get_warehouse_id()
     response = requests.get(
         f"https://{server_hostname}/api/2.0/sql/warehouses/{warehouse_id}",
         headers={'Authorization': f'Bearer {access_token}'}
@@ -38,10 +38,10 @@ def _get_http_path():
     else:
         print("Error: %s: %s" % (response.json()["error_code"], response.json()["message"]))
 
-def create_warehouse_if_not_exists():
+def create_warehouse():
     if _warehouse_exists():
         print(f"{warehouse_name} already exists")
-        return _get_http_path()
+
     else:
         response = requests.post(
             f"https://{server_hostname}/api/2.0/sql/warehouses/",
@@ -59,13 +59,13 @@ def create_warehouse_if_not_exists():
             }
         )
         if response.status_code == 200:
-            return _get_http_path()
+            print(f"{warehouse_name} has been created")
         else:
             print("Error: %s: %s" % (response.json()["error_code"], response.json()["message"]))
 
 
 def stop_warehouse():
-    warehouse_id = _get_warehouse_id()
+    warehouse_id = get_warehouse_id()
     response = requests.post(
         f"https://{server_hostname}/api/2.0/sql/warehouses/{warehouse_id}/stop",
         headers={'Authorization': f'Bearer {access_token}'},
