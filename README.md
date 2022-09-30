@@ -9,10 +9,11 @@ Before you start using this repo, you should create your own configuration file.
 > conda create -n env-python python=3.9 
 ### Activate the environment
 > conda activate env-python
-### Install librairies (if not installed yet)
-> pip install requests
-> pip install databricks-sql-cli
-> pip install databricks-sql-connector
-> pip install pyodbc
+### Install librairies (if not installed yet) 
+> pip install requests  
+> pip install databricks-sql-cli  
+> pip install databricks-sql-connector  
+> pip install pyodbc  (install odbc driver first, i.e. on Mac: brew install unixodbc)
+Also Install databricks pyodbc driver (see https://learn.microsoft.com/en-us/azure/databricks/dev-tools/pyodbc)
 
 https://databricks.atlassian.net/wiki/spaces/UN/pages/2659943487/SQL+Execution+API+-+Private+preview+sql+exec+api+private+preview
