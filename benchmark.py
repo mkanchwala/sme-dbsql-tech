@@ -57,7 +57,7 @@ def _get_query_detail(lookup_key):
         print("Error: %s: %s" % (response.json()["error_code"], response.json()["message"]))
 
 
-def run_benchmark(nb_runs=3, python_package=True, odbc=True, dbsql_cli= True, api=True):
+def run_benchmark(nb_runs=5, python_package=True, odbc=True, dbsql_cli= True, api=True):
     df = pd.DataFrame(columns=["connector", "query"] + metrics_of_interest)
 
     queries_list = [f for f in listdir("queries") if isfile(join("queries", f)) and f[0] != '_'""]
@@ -104,6 +104,7 @@ def run_benchmark(nb_runs=3, python_package=True, odbc=True, dbsql_cli= True, ap
                 print(df)
 
     print(df)
+    df.to_csv("benchmark_output.csv")
 
 if __name__ == '__main__':
-  print(run_benchmark(nb_runs=1))
+  run_benchmark(nb_runs=10)

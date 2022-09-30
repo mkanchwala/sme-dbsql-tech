@@ -1,7 +1,7 @@
 SELECT 
   * 
 FROM 
-  alex.nyctaxi_yellowcab_dates
+  sme_dbsql_perf.nyctaxi
 WHERE
-  passenger_count > 1
+  passenger_count
 LIMIT 1000000
