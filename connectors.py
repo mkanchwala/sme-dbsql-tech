@@ -2,6 +2,7 @@ import os
 import pyodbc
 from databricks import sql
 import requests
+from retrying import retry
 
 from utils import get_config
 from warehouses import get_http_path, create_warehouse, stop_warehouse, get_warehouse_id
@@ -12,6 +13,7 @@ access_token = my_config.get('databricks_token', 'my_pat')
 driver_path = my_config.get('odbc', 'driver_path')
 dirname = os.path.dirname(__file__)
 
+@retry(wait_fixed=2000, stop_max_attempt_number=10)
 def run_query_with_dbsql_cli(query_name="simple_aggregation.sql"):
   create_warehouse()
   http_path = get_http_path()
@@ -29,6 +31,7 @@ def run_query_with_dbsql_cli(query_name="simple_aggregation.sql"):
   os.remove("/tmp/tmp.csv")
   stop_warehouse()
 
+@retry(wait_fixed=2000, stop_max_attempt_number=10)
 def run_query_with_odbc(query_name="simple_aggregation.sql"):
   create_warehouse()
   http_path = get_http_path()
@@ -57,6 +60,7 @@ def run_query_with_odbc(query_name="simple_aggregation.sql"):
   conn.close()
   stop_warehouse()
 
+@retry(wait_fixed=2000, stop_max_attempt_number=10)
 def run_query_with_python_package(query_name="simple_aggregation.sql"):
   create_warehouse()
   http_path = get_http_path()
@@ -76,6 +80,7 @@ def run_query_with_python_package(query_name="simple_aggregation.sql"):
   conn.close()
   stop_warehouse()
 
+@retry(wait_fixed=2000, stop_max_attempt_number=10)
 def run_query_with_api(query_name="simple_aggregation.sql"):
   create_warehouse()
 

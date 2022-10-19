@@ -1,5 +1,5 @@
+from time import sleep
 import requests
-import time
 import pandas as pd
 from os import listdir
 from os.path import isfile, join
@@ -82,7 +82,7 @@ def run_benchmark(nb_runs=5, python_package=True, odbc=True, dbsql_cli= True, ap
                 query_info["query"] = query
                 df = df.append(query_info, ignore_index=True)
                 print(df)
-        
+
         if dbsql_cli:
             for _ in range(nb_runs):
                 run_query_with_dbsql_cli(query)
@@ -91,7 +91,7 @@ def run_benchmark(nb_runs=5, python_package=True, odbc=True, dbsql_cli= True, ap
                 query_info["connector"] = "dbsql_cli"
                 query_info["query"] = query
                 df = df.append(query_info, ignore_index=True)
-                print(df)
+                print(df) 
 
         if api:
             for _ in range(nb_runs):
@@ -107,4 +107,4 @@ def run_benchmark(nb_runs=5, python_package=True, odbc=True, dbsql_cli= True, ap
     df.to_csv("benchmark_output.csv")
 
 if __name__ == '__main__':
-  run_benchmark(nb_runs=10)
+  run_benchmark(nb_runs=4)
