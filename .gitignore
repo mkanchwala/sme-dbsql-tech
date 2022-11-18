@@ -41,3 +41,6 @@ coverage.xml
 
 # Config
 config/my_config.cfg
+
+# Output
+benchmark_output.csv

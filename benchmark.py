@@ -2,11 +2,11 @@ from time import sleep
 import requests
 import pandas as pd
 from os import listdir
-from os.path import isfile, join
+from os.path import isfile
 
 from utils import get_config
 from warehouses import get_warehouse_id
-from connectors import run_query_with_dbsql_cli, run_query_with_odbc, run_query_with_python_package, run_query_with_api
+from connectors import *
 
 my_config = get_config()
 server_hostname = my_config.get('warehouse', 'server_hostname')
@@ -23,9 +23,6 @@ def _get_query_lookup_key():
         headers={'Authorization': f'Bearer {access_token}'},
         json={
             "filter_by": {
-                "statuses": [
-                    "FINISHED"
-                    ],
                 "warehouse_ids": [f"{warehouse_id}"]
             },
             "include_metrics": "true",
@@ -50,61 +47,82 @@ def _get_query_detail(lookup_key):
     )
     if response.status_code == 200:
         response = response.json()
+        query_status = response["res"][0]["queryInfo"]["status"]
         query_metrics = response["res"][0]["queryInfo"]["metrics"]
         query_info = {k: query_metrics[k] if k in query_metrics.keys() else 0 for k in metrics_of_interest }
-        return query_info
+        return query_status, query_info
     else:
         print("Error: %s: %s" % (response.json()["error_code"], response.json()["message"]))
 
 
-def run_benchmark(nb_runs=5, python_package=True, odbc=True, dbsql_cli= True, api=True):
-    df = pd.DataFrame(columns=["connector", "query"] + metrics_of_interest)
+def run_benchmark(nb_runs=5):
+    df = pd.DataFrame(columns=["connector", "query", "status"] + metrics_of_interest)
 
-    queries_list = [f for f in listdir("queries") if isfile(join("queries", f)) and f[0] != '_'""]
+    queries_list = [f for f in listdir("queries") if isfile(f"queries/{f}") and f[0] != '_'""]
 
     for query in queries_list:
-        if python_package:
+        if my_config.get('benchmark', 'python_package'):
             for _ in range(nb_runs):
+                sleep(10)
                 run_query_with_python_package(query)
                 lookup_key = _get_query_lookup_key()
-                query_info = _get_query_detail(lookup_key)
+                query_status, query_info = _get_query_detail(lookup_key)
+                query_info["status"] = query_status
                 query_info["connector"] = "python_package"
                 query_info["query"] = query
                 df = df.append(query_info, ignore_index=True)
                 print(df)
         
-        if odbc:
+        if my_config.get('benchmark', 'odbc'):
             for _ in range(nb_runs):
+                sleep(10)
                 run_query_with_odbc(query)
                 lookup_key = _get_query_lookup_key()
-                query_info = _get_query_detail(lookup_key)
+                query_status, query_info = _get_query_detail(lookup_key)
+                query_info["status"] = query_status
                 query_info["connector"] = "odbc"
                 query_info["query"] = query
                 df = df.append(query_info, ignore_index=True)
                 print(df)
 
-        if dbsql_cli:
+        if my_config.get('benchmark', 'dbsql_cli'):
             for _ in range(nb_runs):
+                sleep(10)
                 run_query_with_dbsql_cli(query)
                 lookup_key = _get_query_lookup_key()
-                query_info = _get_query_detail(lookup_key)
+                query_status, query_info = _get_query_detail(lookup_key)
+                query_info["status"] = query_status
                 query_info["connector"] = "dbsql_cli"
                 query_info["query"] = query
                 df = df.append(query_info, ignore_index=True)
                 print(df) 
 
-        if api:
+        if my_config.get('benchmark', 'api'):
             for _ in range(nb_runs):
+                sleep(10)
                 run_query_with_api(query)
                 lookup_key = _get_query_lookup_key()
-                query_info = _get_query_detail(lookup_key)
+                query_status, query_info = _get_query_detail(lookup_key)
+                query_info["status"] = query_status
                 query_info["connector"] = "api"
                 query_info["query"] = query
                 df = df.append(query_info, ignore_index=True)
                 print(df)
 
+        if my_config.get('benchmark', 'alchemy'):
+            for _ in range(nb_runs):
+                sleep(10)
+                run_query_with_sqlalchemy(query)
+                lookup_key = _get_query_lookup_key()
+                query_status, query_info = _get_query_detail(lookup_key)
+                query_info["status"] = query_status
+                query_info["connector"] = "sqlalchemy"
+                query_info["query"] = query
+                df = df.append(query_info, ignore_index=True)
+                print(df) 
+
     print(df)
-    df.to_csv("benchmark_output.csv")
+    df.to_csv(f"{my_config.get('benchmark', 'output')}/benchmark_output.csv")
 
 if __name__ == '__main__':
-  run_benchmark(nb_runs=4)
+  run_benchmark(int(my_config.get('benchmark', 'nb_runs')))

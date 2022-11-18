@@ -3,6 +3,9 @@ import pyodbc
 from databricks import sql
 import requests
 from retrying import retry
+from sqlalchemy import *
+from sqlalchemy.engine import create_engine
+
 
 from utils import get_config
 from warehouses import get_http_path, create_warehouse, stop_warehouse, get_warehouse_id
@@ -115,3 +118,26 @@ def run_query_with_api(query_name="simple_aggregation.sql"):
       print("Error: %s: %s" % (r.json()["error_code"], r.json()["message"]))
   stop_warehouse()
 
+@retry(wait_fixed=2000, stop_max_attempt_number=10)
+def run_query_with_sqlalchemy(query_name="simple_aggregation.sql"):
+  create_warehouse()
+  
+  http_path = get_http_path()
+  engine = create_engine(
+    f"databricks+connector://token:{access_token}@{server_hostname}:443",
+    connect_args={
+        "http_path": http_path,
+    },
+  )
+
+  sql_filename = os.path.join(dirname, 'queries', query_name)
+  fd = open(sql_filename, 'r')
+  sql_query = fd.read()
+  fd.close()
+
+  connection = engine.connect()
+  res = connection.execute(sql_query)
+  print(res.fetchone())
+  connection.close()
+  
+  stop_warehouse()
