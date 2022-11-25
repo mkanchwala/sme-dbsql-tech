@@ -1,0 +1,6 @@
+requests
+databricks-sql-cli
+databricks-sql-connector
+pyodbc
+retrying
+sqlalchemy-databricks
