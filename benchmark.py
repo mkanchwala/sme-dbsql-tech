@@ -62,7 +62,7 @@ def run_benchmark(nb_runs=5):
     queries_list = [f for f in listdir("queries") if isfile(f"queries/{f}") and f[0] != '_'""]
 
     for query in queries_list:
-        for benchmark_name in ['python_package','odbc','dbsql_cli','api','alchemy']:
+        for benchmark_name in ['python_package','odbc','dbsql_cli','api','sqlalchemy']:
             if my_config.get('benchmark', benchmark_name)!='False':
                 print(f'Running benchmark {benchmark_name}')
                 for _ in range(nb_runs):
