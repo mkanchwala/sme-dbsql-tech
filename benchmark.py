@@ -55,7 +55,6 @@ def _get_query_detail(lookup_key):
     else:
         print("Error: %s: %s" % (response.json()["error_code"], response.json()["message"]))
 
-
 def run_benchmark(nb_runs=5):
     df = pd.DataFrame(columns=["connector", "query", "status"] + metrics_of_interest)
 
@@ -66,13 +65,21 @@ def run_benchmark(nb_runs=5):
             if my_config.get('benchmark', benchmark_name)!='False':
                 print(f'Running benchmark {benchmark_name}')
                 for _ in range(nb_runs):
-                    sleep(10) 
-                    getattr(connectors, f"run_query_with_{benchmark_name}")(query)
-                    lookup_key = _get_query_lookup_key()
-                    query_status, query_info = _get_query_detail(lookup_key)
-                    query_info["status"] = query_status
-                    query_info["connector"] = benchmark_name
-                    query_info["query"] = query
+                    sleep(int(my_config.get('benchmark','wait_runs_sec'))) 
+        
+                    res = getattr(connectors, f"run_query_with_{benchmark_name}")(query)
+                    
+                    if res:
+                        lookup_key = _get_query_lookup_key()
+                        query_status, query_info = _get_query_detail(lookup_key)
+                        query_info["status"] = query_status
+                        query_info["connector"] = benchmark_name
+                        query_info["query"] = query
+                    else:
+                        query_info = {}
+                        query_info["status"] = "ERROR"
+                        query_info["connector"] = benchmark_name
+                        query_info["query"] = query
                     df = df.append(query_info, ignore_index=True)
                     print(df)
 
