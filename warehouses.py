@@ -40,7 +40,7 @@ def get_http_path():
 
 def create_warehouse():
     if _warehouse_exists():
-        print(f"{warehouse_name} already exists")
+        print(f"Warehouse {warehouse_name} already exists")
 
     else:
         response = requests.post(
@@ -59,7 +59,7 @@ def create_warehouse():
             }
         )
         if response.status_code == 200:
-            print(f"{warehouse_name} has been created")
+            print(f"Warehouse {warehouse_name} has been created")
         else:
             print("Error: %s: %s" % (response.json()["error_code"], response.json()["message"]))
 
@@ -71,6 +71,6 @@ def stop_warehouse():
         headers={'Authorization': f'Bearer {access_token}'},
     )
     if response.status_code == 200:
-        print(f"{warehouse_name} has been terminated")
+        print(f"Warehouse {warehouse_name} has been terminated")
     else:
         print("Error: %s: %s" % (response.json()["error_code"], response.json()["message"]))

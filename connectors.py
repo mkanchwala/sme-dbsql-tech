@@ -33,6 +33,7 @@ def run_query_with_dbsql_cli(query_name="simple_aggregation.sql"):
   os.system(cmd.replace("\n", ""))
   os.remove("/tmp/tmp.csv")
   stop_warehouse()
+  return True
 
 @retry(wait_fixed=2000, stop_max_attempt_number=10)
 def run_query_with_odbc(query_name="simple_aggregation.sql"):
@@ -62,6 +63,7 @@ def run_query_with_odbc(query_name="simple_aggregation.sql"):
   cursor.close()
   conn.close()
   stop_warehouse()
+  return True
 
 @retry(wait_fixed=2000, stop_max_attempt_number=10)
 def run_query_with_python_package(query_name="simple_aggregation.sql"):
@@ -82,11 +84,11 @@ def run_query_with_python_package(query_name="simple_aggregation.sql"):
   cursor.close()
   conn.close()
   stop_warehouse()
+  return True
 
 @retry(wait_fixed=2000, stop_max_attempt_number=10)
 def run_query_with_api(query_name="simple_aggregation.sql"):
   create_warehouse()
-
   sql_filename = os.path.join(dirname, 'queries', query_name)
   fd = open(sql_filename, 'r')
   sql_query = fd.read()
@@ -112,11 +114,16 @@ def run_query_with_api(query_name="simple_aggregation.sql"):
         r= requests.get(f"{url}/{fetch_token}", headers=headers)
         if r.status_code == 200:
           state = r.json()["execution_status"]["state"]
+          res = True
         else:
           print("Error: %s: %s" % (r.json()["error_code"], r.json()["message"]))
+          res = False
   else:
       print("Error: %s: %s" % (r.json()["error_code"], r.json()["message"]))
+      res = False
+
   stop_warehouse()
+  return res
 
 @retry(wait_fixed=2000, stop_max_attempt_number=10)
 def run_query_with_sqlalchemy(query_name="simple_aggregation.sql"):
@@ -141,3 +148,4 @@ def run_query_with_sqlalchemy(query_name="simple_aggregation.sql"):
   connection.close()
   
   stop_warehouse()
+  return True
